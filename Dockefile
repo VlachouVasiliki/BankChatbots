@@ -1,0 +1,21 @@
+# 1. Χρησιμοποιούμε το επίσημο image της Microsoft που έχει ήδη Linux + Browsers
+FROM mcr.microsoft.com/playwright:v1.40.0-focal
+
+# 2. Εγκαθιστούμε το Azure Functions Docker Host (απαραίτητο για να τρέξει η συνάρτηση)
+ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
+    FUNCTIONS_WORKER_RUNTIME=node
+
+# 3. Δημιουργούμε τον κατάλογο εργασίας
+WORKDIR /home/site/wwwroot
+
+# 4. Αντιγράφουμε τα αρχεία των εξαρτήσεων
+COPY package*.json ./
+
+# 5. Εγκαθιστούμε τις βιβλιοθήκες (playwright, κτλ)
+RUN npm install
+
+# 6. Αντιγράφουμε όλο τον υπόλοιπο κώδικα (bots.js, AskBankFunction, κτλ)
+COPY . .
+
+# 7. Η Azure Function "ακούει" αυτόματα από εδώ

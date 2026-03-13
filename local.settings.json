@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "GEMINI_API_KEY": "AIzaSyA6KL3L4wmQXDkppv1kR7IyfMfCU4A5qSw",
+    "NODE_OPTIONS": "--dns-result-order=ipv4first"
+  },
+  "Host": {
+    "CORS": "*"
+  }
+}

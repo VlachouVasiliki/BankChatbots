@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>BankBot Comparator</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 40px; color: #333; }
+        .container { max-width: 1000px; margin: auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        
+        .search-box { display: flex; gap: 10px; justify-content: center; margin-bottom: 40px; }
+        input { width: 60%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: #007bff; }
+        
+        button { padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .bank-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #007bff; }
+        .bank-card h3 { margin-top: 0; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .response-text { font-size: 14px; line-height: 1.6; color: #555; min-height: 50px; white-space: pre-wrap; }
+        
+        .loading { color: #888; font-style: italic; }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>BankBot Aggregator</h2>
+        <p>Ρώτα μία φορά, πάρε απαντήσεις από όλες τις τράπεζες</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="q" placeholder="Γράψε την ερώτηση εδώ (π.χ. Πώς βγάζω κάρτα;)...">
+        <button id="askBtn" onclick="askAll()">ASK ALL BANKS</button>
+    </div>
+
+    <div class="grid">
+        <div class="bank-card" style="border-top-color: #004b87;">
+            <h3>Alpha Bank</h3>
+            <div id="alpha-res" class="response-text">Περιμένω ερώτηση...</div>
+        </div>
+
+        <div class="bank-card" style="border-top-color: #ed1c24;">
+            <h3>Eurobank</h3>
+            <div id="euro-res" class="response-text">Περιμένω ερώτηση...</div>
+        </div>
+
+        <div class="bank-card" style="border-top-color: #008474;">
+            <h3>Εθνική Τράπεζα</h3>
+            <div id="nbg-res" class="response-text">Περιμένω ερώτηση...</div>
+        </div>
+
+        <div class="bank-card" style="border-top-color: #ffcc00;">
+            <h3>Τράπεζα Πειραιώς</h3>
+            <div id="piraeus-res" class="response-text">Περιμένω ερώτηση...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+async function askBank(bankId) {
+    const q = document.getElementById('q').value;
+    const resDiv = document.getElementById(bankId + '-res');
+    
+    resDiv.innerHTML = '<span class="loading">Σκέφτεται...</span>';
+    
+    try {
+        // 1. Αλλαγή URL για να χτυπάει την Azure Function τοπικά
+        // 2. Προσθήκη του /api/ που βάζει η Azure από προεπιλογή
+        const res = await fetch('/api/ask/' + bankId, { //http://localhost:7071 
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question: q })
+        });
+        
+        const data = await res.json();
+        
+        // 3. Αλλαγή από data.answer σε data.reply (όπως το ονομάσαμε στην Azure)
+        resDiv.innerText = data.reply || data.error || "Δεν λήφθηκε απάντηση";
+        
+    } catch (err) {
+        console.error(err);
+        resDiv.innerHTML = '<span class="error">Αποτυχία σύνδεσης (CORS ή Server Offline)</span>';
+    }
+}
+
+function askAll() {
+        const q = document.getElementById('q').value;
+        if(!q) return alert("Γράψε μια ερώτηση!");
+        
+        // --- ΚΑΘΑΡΙΣΜΟΣ ΠΛΑΙΣΙΩΝ ΠΡΙΝ ΤΗΝ ΕΡΩΤΗΣΗ ---
+        const resDivs = ['alpha-res', 'euro-res', 'nbg-res', 'piraeus-res'];
+        resDivs.forEach(id => {
+            document.getElementById(id).innerHTML = '<span class="loading">Περιμένω απάντηση...</span>';
+        });
+
+        document.getElementById('askBtn').disabled = true;
+
+        // Εκτελούνται και οι 4 κλήσεις ταυτόχρονα
+        Promise.all([
+            askBank('alpha'),
+            askBank('euro'),
+            askBank('nbg'),
+            askBank('piraeus')
+        ]).finally(() => {
+            document.getElementById('askBtn').disabled = false;
+            // Προαιρετικά: καθάρισε το input field μετά την ερώτηση
+            // document.getElementById('q').value = ""; 
+        });
+    }
+</script>
+
+</body>
+</html>
