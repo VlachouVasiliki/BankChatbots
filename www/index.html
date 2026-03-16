@@ -96,7 +96,7 @@ function askAll() {
         // --- ΚΑΘΑΡΙΣΜΟΣ ΠΛΑΙΣΙΩΝ ΠΡΙΝ ΤΗΝ ΕΡΩΤΗΣΗ ---
         const resDivs = ['alpha-res', 'euro-res', 'nbg-res', 'piraeus-res'];
         resDivs.forEach(id => {
-            document.getElementById(id).innerHTML = '<span class="loading">Περιμένω απάντηση...</span>';
+            document.getElementById(id).innerHTML = '<span class="loading">Περιμένω απάντηση με ανυπομονησία...</span>';
         });
 
         document.getElementById('askBtn').disabled = true;
