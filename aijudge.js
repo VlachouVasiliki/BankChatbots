@@ -1,4 +1,4 @@
-import 'dotenv/config';
+//require('dotenv').config();
 // const { GoogleGenerativeAI } = require("@google/generative-ai");
 // const { setGlobalDispatcher, ProxyAgent } = require("undici");
 import OpenAI from "openai";
@@ -10,8 +10,6 @@ const api_key = process.env.AZURE_OPENAI_KEY;
 const client = new OpenAI({
     baseURL: endpoint,
     apiKey: api_key,
-    defaultQuery: { 'api-version': '2024-02-01' }, 
-    defaultHeaders: { 'api-key': api_key }
 });
 
 
